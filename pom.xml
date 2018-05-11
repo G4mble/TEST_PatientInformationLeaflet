@@ -24,6 +24,7 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- USE CPU BACKEND -->
     <dependency>
       <groupId>org.nd4j</groupId>
       <artifactId>nd4j-native-platform</artifactId>
