@@ -1,6 +1,8 @@
 package com.EEB.PatientInformationLeaflet.ModelTraining;
 
 import com.EEB.PatientInformationLeaflet.ModelUsage.ModelOutputTest;
+import com.EEB.Preprocessing.StringPreprocessor;
+import org.apache.commons.io.FileUtils;
 import org.datavec.api.util.ClassPathResource;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
@@ -8,7 +10,9 @@ import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.stopwords.StopWords;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
+import org.deeplearning4j.text.tokenization.tokenizerfactory.NGramTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +23,8 @@ public class SingleStageModelTraining
     private static Logger _log = LoggerFactory.getLogger(ModelOutputTest.class);
 
     //TODO use small dataset
-    private static final String _filename = "text_input/news.en.heldout-00000-of-00050";
+//    private static final String _filename = "text_input/news.en.heldout-00000-of-00050";
+    private static final String _filename = "text_input/test.txt";
 
     //TODO use large dataset
 //    private static final String _filename = "text_input/news.en-00001-of-00100";
@@ -29,7 +34,7 @@ public class SingleStageModelTraining
         long startTime = System.currentTimeMillis();
         _log.info("Attempting to load dataset...");
         File dataset = new File(new ClassPathResource(_filename).getFile().getAbsolutePath());
-        if(!dataset.exists())
+        if (!dataset.exists())
         {
             _log.error("Dataset does not exist at: " + _filename);
             _log.info("Terminating...");
@@ -37,37 +42,52 @@ public class SingleStageModelTraining
         }
 
         _log.info("Configuring input parameters...");
-        // FileNotFoundException should actually never occur as we account for this above
         SentenceIterator sentenceIterator = new BasicLineIterator(dataset);
-        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-        tokenizerFactory.setTokenPreProcessor(new CommonPreprocessor());
+//        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+        TokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
+        TokenizerFactory tokenizerFactory = new NGramTokenizerFactory(defaultTokenizerFactory, 1, 3);
+        tokenizerFactory.setTokenPreProcessor(new StringPreprocessor());
 
         _log.info("Building model...");
+        //TODO TS evaluate current && further parameters
         Word2Vec model = new Word2Vec.Builder()
 //                .useHierarchicSoftmax(false)
 //                .negativeSample(10)
-                .minWordFrequency(5)
+                .minWordFrequency(8)
+                .allowParallelTokenization(false)
+                //how often one batch size is iterated
                 .iterations(1)
-                .epochs(1)
-//                .batchSize(1000)
-                .layerSize(100)
+                //how often the whole corpus [and thereby each batch/iteration] is processed
+                .epochs(2)
+                //                .batchSize(1000)
+                //size of the feature vector
+                .layerSize(200)
+                //initialization seed for the feature vector [keep the same for reproducible results]
                 .seed(34)
-                .windowSize(5)
+                //context window size
+                .windowSize(6)
                 .iterate(sentenceIterator)
                 .tokenizerFactory(tokenizerFactory)
                 .stopWords(StopWords.getStopWords())
                 .build();
+
         _log.info("Start model training...");
         model.fit();
         _log.info("Model training completed.");
         _log.info("Elapsed time since start: " + (System.currentTimeMillis() - startTime) + " ms");
 
         _log.info("Testing model:");
+
+        // vocabulary output
+        FileUtils.writeLines(new File("vocabulary.txt"), model.getVocab().words());
+
         System.out.println("Testoutput: " + model.hasWord("the"));
         System.out.println("Testoutput: " + model.hasWord("when"));
         System.out.println("Testoutput: " + model.hasWord("then"));
         System.out.println("Testoutput: " + model.hasWord("and"));
         System.out.println("Testoutput: " + model.hasWord("now"));
+        System.out.println("Testoutput: " + model.hasWord("criminal"));
+        System.out.println("Testoutput: " + model.hasWord(" criminal"));
         System.out.println("Testoutput: " + model.hasWord("color"));
         System.out.println("Testoutput: " + model.wordsNearest("color", 10));
 
