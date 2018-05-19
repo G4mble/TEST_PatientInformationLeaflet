@@ -13,6 +13,8 @@ import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFac
 import org.deeplearning4j.text.tokenization.tokenizerfactory.NGramTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
+import org.nd4j.nativeblas.Nd4jBlas;
+import org.nd4j.nativeblas.Nd4jCpuPresets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,10 +26,10 @@ public class SingleStageModelTraining
 
     //TODO use small dataset
 //    private static final String _filename = "text_input/news.en.heldout-00000-of-00050";
-    private static final String _filename = "text_input/test.txt";
+//    private static final String _filename = "text_input/test.txt";
 
     //TODO use large dataset
-//    private static final String _filename = "text_input/news.en-00001-of-00100";
+    private static final String _filename = "text_input/news.en-00001-of-00100";
 
     public static void main(String[] args) throws Exception
     {
@@ -55,10 +57,11 @@ public class SingleStageModelTraining
 //                .negativeSample(10)
                 .minWordFrequency(8)
                 .allowParallelTokenization(false)
+                .workers(8)
                 //how often one batch size is iterated
                 .iterations(1)
                 //how often the whole corpus [and thereby each batch/iteration] is processed
-                .epochs(2)
+                .epochs(1)
                 //                .batchSize(1000)
                 //size of the feature vector
                 .layerSize(200)
