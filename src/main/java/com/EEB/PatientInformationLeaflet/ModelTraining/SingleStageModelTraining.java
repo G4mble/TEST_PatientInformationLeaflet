@@ -2,19 +2,18 @@ package com.EEB.PatientInformationLeaflet.ModelTraining;
 
 import com.EEB.PatientInformationLeaflet.ModelUsage.ModelOutputTest;
 import com.EEB.Preprocessing.StringPreprocessor;
+import com.EEB.Tokenizer.GermanNGramTokenizerFactory;
 import org.apache.commons.io.FileUtils;
 import org.datavec.api.util.ClassPathResource;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
+import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
+import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.stopwords.StopWords;
-import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.NGramTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
-import org.nd4j.nativeblas.Nd4jBlas;
-import org.nd4j.nativeblas.Nd4jCpuPresets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,28 +25,29 @@ public class SingleStageModelTraining
 
     //TODO use small dataset
 //    private static final String _filename = "text_input/news.en.heldout-00000-of-00050";
-//    private static final String _filename = "text_input/test.txt";
+    private static final String _filename = "text_input/test.txt";
 
     //TODO use large dataset
-    private static final String _filename = "text_input/news.en-00001-of-00100";
+//    private static final String _filename = "text_input/news.en-00001-of-00100";
 
     public static void main(String[] args) throws Exception
     {
         long startTime = System.currentTimeMillis();
-        _log.info("Attempting to load dataset...");
-        File dataset = new File(new ClassPathResource(_filename).getFile().getAbsolutePath());
-        if (!dataset.exists())
-        {
-            _log.error("Dataset does not exist at: " + _filename);
-            _log.info("Terminating...");
-            return;
-        }
+//        _log.info("Attempting to load dataset...");
+//        File dataset = new File(new ClassPathResource(_filename).getFile().getAbsolutePath());
+//        if (!dataset.exists())
+//        {
+//            _log.error("Dataset does not exist at: " + _filename);
+//            _log.info("Terminating...");
+//            return;
+//        }
 
         _log.info("Configuring input parameters...");
-        SentenceIterator sentenceIterator = new BasicLineIterator(dataset);
+//        SentenceIterator sentenceIterator = new BasicLineIterator(dataset);
+        SentenceIterator sentenceIterator = new FileSentenceIterator(new File(new ClassPathResource("text_input").getFile().getAbsolutePath()));
 //        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
         TokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
-        TokenizerFactory tokenizerFactory = new NGramTokenizerFactory(defaultTokenizerFactory, 1, 3);
+        TokenizerFactory tokenizerFactory = new GermanNGramTokenizerFactory(defaultTokenizerFactory, 1, 3);
         tokenizerFactory.setTokenPreProcessor(new StringPreprocessor());
 
         _log.info("Building model...");
@@ -55,7 +55,7 @@ public class SingleStageModelTraining
         Word2Vec model = new Word2Vec.Builder()
 //                .useHierarchicSoftmax(false)
 //                .negativeSample(10)
-                .minWordFrequency(8)
+                .minWordFrequency(1)
                 .allowParallelTokenization(false)
                 .workers(8)
                 //how often one batch size is iterated
