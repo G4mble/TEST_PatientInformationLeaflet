@@ -4,8 +4,15 @@ import com.EEB.PatientInformationLeaflet.ModelUsage.ModelOutputTest;
 import com.EEB.Preprocessing.StringPreprocessor;
 import com.EEB.Tokenizer.GermanNGramTokenizerFactory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.datavec.api.util.ClassPathResource;
+import org.deeplearning4j.api.storage.StatsStorage;
+import org.deeplearning4j.models.embeddings.WeightLookupTable;
+import org.deeplearning4j.models.embeddings.inmemory.InMemoryLookupTable;
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+import org.deeplearning4j.models.word2vec.VocabWord;
 import org.deeplearning4j.models.word2vec.Word2Vec;
+import org.deeplearning4j.models.word2vec.wordstore.VocabCache;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
 import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator;
@@ -14,18 +21,25 @@ import org.deeplearning4j.text.stopwords.StopWords;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
+import org.deeplearning4j.ui.api.UIServer;
+import org.deeplearning4j.ui.stats.StatsListener;
+import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
+import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class SingleStageModelTraining
 {
     private static Logger _log = LoggerFactory.getLogger(ModelOutputTest.class);
 
     //TODO use small dataset
-//    private static final String _filename = "text_input/news.en.heldout-00000-of-00050";
-    private static final String _filename = "text_input/test.txt";
+    private static final String _filename = "text_input/news.en.heldout-00000-of-00050";
+//    private static final String _filename = "text_input/test.txt";
 
     //TODO use large dataset
 //    private static final String _filename = "text_input/news.en-00001-of-00100";
@@ -33,21 +47,21 @@ public class SingleStageModelTraining
     public static void main(String[] args) throws Exception
     {
         long startTime = System.currentTimeMillis();
-//        _log.info("Attempting to load dataset...");
-//        File dataset = new File(new ClassPathResource(_filename).getFile().getAbsolutePath());
-//        if (!dataset.exists())
-//        {
-//            _log.error("Dataset does not exist at: " + _filename);
-//            _log.info("Terminating...");
-//            return;
-//        }
+        _log.info("Attempting to load dataset...");
+        File dataset = new File(new ClassPathResource(_filename).getFile().getAbsolutePath());
+        if (!dataset.exists())
+        {
+            _log.error("Dataset does not exist at: " + _filename);
+            _log.info("Terminating...");
+            return;
+        }
 
         _log.info("Configuring input parameters...");
-//        SentenceIterator sentenceIterator = new BasicLineIterator(dataset);
-        SentenceIterator sentenceIterator = new FileSentenceIterator(new File(new ClassPathResource("text_input").getFile().getAbsolutePath()));
-//        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
-        TokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
-        TokenizerFactory tokenizerFactory = new GermanNGramTokenizerFactory(defaultTokenizerFactory, 1, 3);
+        SentenceIterator sentenceIterator = new BasicLineIterator(dataset);
+//        SentenceIterator sentenceIterator = new FileSentenceIterator(new File(new ClassPathResource("text_input").getFile().getAbsolutePath()));
+        TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
+//        TokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
+//        TokenizerFactory tokenizerFactory = new GermanNGramTokenizerFactory(defaultTokenizerFactory, 1, 3);
         tokenizerFactory.setTokenPreProcessor(new StringPreprocessor());
 
         _log.info("Building model...");
@@ -82,20 +96,44 @@ public class SingleStageModelTraining
         _log.info("Testing model:");
 
         // vocabulary output
-        FileUtils.writeLines(new File("vocabulary.txt"), model.getVocab().words());
+//        FileUtils.writeLines(new File("vocabulary.txt"), model.getVocab().words());
 
-        System.out.println("Testoutput: " + model.hasWord("the"));
-        System.out.println("Testoutput: " + model.hasWord("when"));
-        System.out.println("Testoutput: " + model.hasWord("then"));
-        System.out.println("Testoutput: " + model.hasWord("and"));
-        System.out.println("Testoutput: " + model.hasWord("now"));
-        System.out.println("Testoutput: " + model.hasWord("criminal"));
-        System.out.println("Testoutput: " + model.hasWord(" criminal"));
-        System.out.println("Testoutput: " + model.hasWord("color"));
-        System.out.println("Testoutput: " + model.wordsNearest("color", 10));
 
-//        _log.info("Saving model...");
-//        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd_hh-mm-ss");
-//        WordVectorSerializer.writeWord2VecModel(model, "model_output_" + dateFormat.format(new Date()) + "_test.cdf");
+//////        VocabCache cache = model.getVocab();
+//////        INDArray weights = model.getLookupTable().getWeights();
+
+        List<String> weightedWordVectors = new ArrayList<>();
+        InMemoryLookupTable lookupTable = (InMemoryLookupTable)model.lookupTable();
+        for (Object word : lookupTable.getVocab().words())
+        {
+//            double[] vector = model.getWordVector(word);
+            INDArray wordVector = lookupTable.vector((String)word);
+            double[] vector = wordVector.dup().data().asDouble();
+            StringBuilder vectorStringBuilder = new StringBuilder();
+            for(double element : vector)
+            {
+                vectorStringBuilder.append(" ").append(element);
+            }
+            String vectorString = vectorStringBuilder.toString().trim().replaceAll("(\\\\r|\\\\n)", "");
+
+            weightedWordVectors.add(word + " " + vectorString);
+        }
+        FileUtils.writeLines(new File("weightedWords.txt"), weightedWordVectors);
+
+        FileUtils.writeLines(new File("vocabulary.txt"), lookupTable.getVocab().words());
+
+//        System.out.println("Testoutput: " + model.hasWord("the"));
+//        System.out.println("Testoutput: " + model.hasWord("when"));
+//        System.out.println("Testoutput: " + model.hasWord("then"));
+//        System.out.println("Testoutput: " + model.hasWord("and"));
+//        System.out.println("Testoutput: " + model.hasWord("now"));
+//        System.out.println("Testoutput: " + model.hasWord("criminal"));
+//        System.out.println("Testoutput: " + model.hasWord(" criminal"));
+//        System.out.println("Testoutput: " + model.hasWord("color"));
+//        System.out.println("Testoutput: " + model.wordsNearest("color", 10));
+
+        _log.info("Saving model...");
+        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-dd_hh-mm-ss");
+        WordVectorSerializer.writeWord2VecModel(model, "model_output_" + dateFormat.format(new Date()) + "_test.cmf");
     }
 }
