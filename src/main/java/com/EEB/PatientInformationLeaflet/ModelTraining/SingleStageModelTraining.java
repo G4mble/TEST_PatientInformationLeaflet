@@ -2,33 +2,26 @@ package com.EEB.PatientInformationLeaflet.ModelTraining;
 
 import com.EEB.PatientInformationLeaflet.ModelUsage.ModelOutputTest;
 import com.EEB.Preprocessing.StringPreprocessor;
-import com.EEB.Tokenizer.GermanNGramTokenizerFactory;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.datavec.api.util.ClassPathResource;
-import org.deeplearning4j.api.storage.StatsStorage;
-import org.deeplearning4j.models.embeddings.WeightLookupTable;
+import org.deeplearning4j.datasets.iterator.file.FileMultiDataSetIterator;
 import org.deeplearning4j.models.embeddings.inmemory.InMemoryLookupTable;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.word2vec.VocabWord;
 import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.deeplearning4j.models.word2vec.wordstore.VocabCache;
+import org.deeplearning4j.text.documentiterator.DocumentIterator;
+import org.deeplearning4j.text.documentiterator.FileDocumentIterator;
 import org.deeplearning4j.text.sentenceiterator.BasicLineIterator;
-import org.deeplearning4j.text.sentenceiterator.FileSentenceIterator;
-import org.deeplearning4j.text.sentenceiterator.LineSentenceIterator;
 import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.stopwords.StopWords;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
 
-import org.deeplearning4j.ui.api.UIServer;
-import org.deeplearning4j.ui.stats.StatsListener;
-import org.deeplearning4j.ui.storage.InMemoryStatsStorage;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -58,6 +51,7 @@ public class SingleStageModelTraining
 
         _log.info("Configuring input parameters...");
         SentenceIterator sentenceIterator = new BasicLineIterator(dataset);
+//        DocumentIterator sentenceIterator = new FileDocumentIterator(dataset);
 //        SentenceIterator sentenceIterator = new FileSentenceIterator(new File(new ClassPathResource("text_input").getFile().getAbsolutePath()));
         TokenizerFactory tokenizerFactory = new DefaultTokenizerFactory();
 //        TokenizerFactory defaultTokenizerFactory = new DefaultTokenizerFactory();
