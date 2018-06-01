@@ -17,7 +17,7 @@ public class ModelOutputTest
     private static Logger _log = LoggerFactory.getLogger(ModelOutputTest.class);
 
     //TODO change filename --> you can put your models in the "reources/model_output" folder
-    private static final String _filename = "model_output/M_002_model_output_2018-05-31_12-56-12.cmf";
+    private static final String _filename = "model_output/M_005_model_output_2018-05-31_05-21-09.cmf";
 
     public static void main( String[] args ) throws Exception
     {
@@ -41,21 +41,21 @@ public class ModelOutputTest
 //        _log.info("SomeResult: " + word2VecModel.wordsNearestSum("word", 5));
 //        _log.info("SomeResult: " + word2VecModel.accuracy(Arrays.asList("word")));
 
-        String aspirinStem = GermanStem.stem("aspirin");
-        String ibuStem = GermanStem.stem("ibuprofen");
-        String kopfschmerzStem = GermanStem.stem("kopfschmerzen");
-        String nebenwStem = GermanStem.stem("nebenwirkung");
-        String anwendungStem = GermanStem.stem("anwendung");
-        String medStem = GermanStem.stem("medikament");
-        String schmerzmittelStem = GermanStem.stem("schmerzmittel");
+//        String aspirinStem = GermanStem.stem("aspirin");
+//        String ibuStem = GermanStem.stem("ibuprofen");
+//        String kopfschmerzStem = GermanStem.stem("kopfschmerzen");
+//        String nebenwStem = GermanStem.stem("nebenwirkung");
+//        String anwendungStem = GermanStem.stem("anwendung");
+//        String medStem = GermanStem.stem("medikament");
+//        String schmerzmittelStem = GermanStem.stem("schmerzmittel");
 
-//        String aspirinStem = "aspirin";
-//        String ibuStem = "ibuprofen";
-//        String kopfschmerzStem = "kopfschmerzen";
-//        String nebenwStem = "nebenwirkung";
-//        String anwendungStem = "anwendung";
-//        String medStem = "medikament";
-//        String schmerzmittelStem = "schmerzmittel";
+        String aspirinStem = "aspirin";
+        String ibuStem = "ibuprofen";
+        String kopfschmerzStem = "kopfschmerzen";
+        String nebenwStem = "nebenwirkung";
+        String anwendungStem = "anwendung";
+        String medStem = "medikament";
+        String schmerzmittelStem = "schmerzmittel";
 
         StringBuilder builder = new StringBuilder();
         builder.append("HasWord(aspirin): ").append(word2VecModel.hasWord(aspirinStem));
@@ -119,6 +119,8 @@ public class ModelOutputTest
         builder.append("NEW wordsNearest(ibuprofen, nebenwirkung): ").append(word2VecModel.wordsNearest(word2VecModel.getWordVectorMatrix(ibuStem).add(word2VecModel.getWordVectorMatrix(nebenwStem)), 10));
         builder.append("\n\n");
         builder.append("NEW wordsNearest(kopfschmerzen, schmerzmittel): ").append(word2VecModel.wordsNearest(word2VecModel.getWordVectorMatrix(kopfschmerzStem).add(word2VecModel.getWordVectorMatrix(schmerzmittelStem)), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(ibuprofen (-) kopfschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(ibuStem), Arrays.asList(kopfschmerzStem), 10));
 
         FileUtils.write(new File("modelEvaluation.txt"), builder.toString());
     }
