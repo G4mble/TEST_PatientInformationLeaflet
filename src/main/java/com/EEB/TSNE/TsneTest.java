@@ -37,14 +37,15 @@ public class TsneTest {
 
             //STEP 2: Turn text input into a list of words
             log.info("Load & Vectorize data....");
-            File wordFile = new ClassPathResource("weightedWords.txt").getFile();   //Open the file
+//            File wordFile = new ClassPathResource("weightedWords.txt").getFile();   //Open the file
+//
+//            //Get the data of all unique word vectors
+//            Pair<InMemoryLookupTable,VocabCache> vectors = WordVectorSerializer.loadTxt(wordFile);
+//            VocabCache cache = vectors.getSecond();
+//            INDArray weights = vectors.getFirst().getSyn0();    //seperate weights of unique words into their own list
 
-            //Get the data of all unique word vectors
-            Pair<InMemoryLookupTable,VocabCache> vectors = WordVectorSerializer.loadTxt(wordFile);
-            VocabCache cache = vectors.getSecond();
-            INDArray weights = vectors.getFirst().getSyn0();    //seperate weights of unique words into their own list
-
-            Word2Vec model = WordVectorSerializer.readWord2VecModel("model_output_2018-05-24_12-17-27_test.cmf");
+            File modelFile = new File(new ClassPathResource("model_output/M_003_model_output_2018-05-31_02-18-43.cmf").getFile().getAbsolutePath());
+            Word2Vec model = WordVectorSerializer.readWord2VecModel(modelFile);
             VocabCache cache2 = model.getVocab();
             InMemoryLookupTable table = (InMemoryLookupTable)model.lookupTable();
             INDArray weights2 = table.getSyn0();
