@@ -16,7 +16,7 @@ public class ModelOutputTest
     private static Logger _log = LoggerFactory.getLogger(ModelOutputTest.class);
 
     //TODO change filename --> you can put your models in the "reources/model_output" folder
-    private static final String _filename = "model_output/M_005_model_output_2018-05-31_05-21-09.cmf";
+    private static final String _filename = "model_output/MW_005_model_output_2018-06-03_12-09-16.cmf";
 
     public static void main( String[] args ) throws Exception
     {
@@ -53,6 +53,16 @@ public class ModelOutputTest
 //        String zentragressStem = GermanStem.stem("zentragress");
 //        String retortapyrinStem = GermanStem.stem("retortapyrin");
 
+//        String koenigStem = GermanStem.stem("koenig");
+//        String koeniginStem = GermanStem.stem("koenigin");
+//        String mannStem = GermanStem.stem("mann");
+//        String frauStem = GermanStem.stem("frau");
+
+        String koenigStem = "koenig";
+        String koeniginStem = "koenigin";
+        String mannStem = "mann";
+        String frauStem = "frau";
+
         String aspirinStem = "aspirin";
         String ibuStem = "ibuprofen";
         String kopfschmerzStem = "kopfschmerzen";
@@ -67,6 +77,32 @@ public class ModelOutputTest
         String retortapyrinStem = "retortapyrin";
 
         StringBuilder builder = new StringBuilder();
+
+        builder.append("HasWord(koenig): ").append(word2VecModel.hasWord(koenigStem));
+        builder.append("\n\n");
+        builder.append("HasWord(koenigin): ").append(word2VecModel.hasWord(koeniginStem));
+        builder.append("\n\n");
+        builder.append("HasWord(mann): ").append(word2VecModel.hasWord(mannStem));
+        builder.append("\n\n");
+        builder.append("HasWord(frau): ").append(word2VecModel.hasWord(frauStem));
+        builder.append("\n\n");
+        builder.append("similarity(koenig, koenigin): ").append(word2VecModel.similarity(koenigStem, koeniginStem));
+        builder.append("\n\n");
+        builder.append("similarity(mann, frau): ").append(word2VecModel.similarity(mannStem, frauStem));
+        builder.append("\n\n");
+        builder.append("similarity(mann, koenig): ").append(word2VecModel.similarity(mannStem, koenigStem));
+        builder.append("\n\n");
+        builder.append("similarity(frau, koenigin): ").append(word2VecModel.similarity(frauStem, koeniginStem));
+        builder.append("\n\n");
+        builder.append("wordsNearest(koenig-mann+frau): ").append(word2VecModel.wordsNearest(Arrays.asList(koenigStem, frauStem), Arrays.asList(mannStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(koenigin-frau+mann): ").append(word2VecModel.wordsNearest(Arrays.asList(koeniginStem, mannStem), Arrays.asList(frauStem), 10));
+        builder.append("\n\n");
+        builder.append("---------------------------------------------------------------");
+        builder.append("---------------------------------------------------------------");
+        builder.append("\n\n");
+
+
 
         builder.append("HasWord(aspirin): ").append(word2VecModel.hasWord(aspirinStem));
         builder.append("\n\n");
