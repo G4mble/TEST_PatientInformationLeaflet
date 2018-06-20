@@ -1,8 +1,6 @@
 package com.EEB.PatientInformationLeaflet.ModelUsage;
 
-import com.EEB.Preprocessing.GermanStem;
 import org.apache.commons.io.FileUtils;
-import org.datavec.api.util.ClassPathResource;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.slf4j.Logger;
@@ -15,12 +13,12 @@ public class ModelOutputTest
 {
     private static Logger _log = LoggerFactory.getLogger(ModelOutputTest.class);
 
-    //TODO change filename --> you can put your models in the "reources/model_output" folder
-    private static final String _filename = "model_output/MW_005_model_output_2018-06-03_12-09-16.cmf";
+    //TODO change filename --> ABSOLUTE PATH!!!!!
+    private static final String _filename = "G:\\IntelliJIdea\\Word2Vec_PatientInformationLeaflet\\model_output_2018-06-20_11-53-30.cmf";
 
     public static void main( String[] args ) throws Exception
     {
-        File modelFile = new File(new ClassPathResource(_filename).getFile().getAbsolutePath());
+        File modelFile = new File(_filename);
         if(!modelFile.exists())
         {
             _log.error("Model file does not exist at: " + _filename);
@@ -66,6 +64,7 @@ public class ModelOutputTest
         String aspirinStem = "aspirin";
         String ibuStem = "ibuprofen";
         String kopfschmerzStem = "kopfschmerzen";
+        String rueckenSchmerzStem = "rueckenschmerzen";
         String nebenwStem = "nebenwirkung";
         String anwendungStem = "anwendung";
         String medStem = "medikament";
@@ -109,6 +108,8 @@ public class ModelOutputTest
         builder.append("HasWord(ibuprofen): ").append(word2VecModel.hasWord(ibuStem));
         builder.append("\n\n");
         builder.append("HasWord(kopfschmerzen): ").append(word2VecModel.hasWord(kopfschmerzStem));
+        builder.append("\n\n");
+        builder.append("HasWord(rueckenschmerzen): ").append(word2VecModel.hasWord(rueckenSchmerzStem));
         builder.append("\n\n");
         builder.append("HasWord(nebenwirkung): ").append(word2VecModel.hasWord(nebenwStem));
         builder.append("\n\n");
@@ -267,6 +268,18 @@ public class ModelOutputTest
         builder.append("wordsNearest(zentragress (-) kopfschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(zentragressStem), Arrays.asList(kopfschmerzStem), 10));
         builder.append("\n\n");
         builder.append("wordsNearest(retortapyrin (-) kopfschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(retortapyrinStem), Arrays.asList(kopfschmerzStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(apsirin (-) kopfschmerzen (+) rückenschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(aspirinStem, rueckenSchmerzStem), Arrays.asList(kopfschmerzStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(ibuprofen (-) kopfschmerzen (+) rückenschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(ibuStem, rueckenSchmerzStem), Arrays.asList(kopfschmerzStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(vivimed (-) kopfschmerzen (+) rückenschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(vivimedStem, rueckenSchmerzStem), Arrays.asList(kopfschmerzStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(temagin (-) kopfschmerzen (+) rückenschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(temaginStem, rueckenSchmerzStem), Arrays.asList(kopfschmerzStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(zentragress (-) kopfschmerzen (+) rückenschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(zentragressStem, rueckenSchmerzStem), Arrays.asList(kopfschmerzStem), 10));
+        builder.append("\n\n");
+        builder.append("wordsNearest(retortapyrin (-) kopfschmerzen (+) rückenschmerzen): ").append(word2VecModel.wordsNearest(Arrays.asList(retortapyrinStem, rueckenSchmerzStem), Arrays.asList(kopfschmerzStem), 10));
         builder.append("\n\n");
         builder.append("wordsNearest(medikament)").append(word2VecModel.wordsNearest(medStem, 20));
 
